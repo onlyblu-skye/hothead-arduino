@@ -1,5 +1,5 @@
 # Hot Head — My Physical Computing Project
-Hot Head is a physical party game built with a microcontroller, buttons, a display, sound effects and a 3D-Packaging. The project was developed in an academic context as part of a computer science course and features timed word guessing, online/offline word sources, visual feedback and interactive hardware controls.
+Hot Head is an interactive party game that mixes the thrill of Heads Up with the tension of Hot Potato. Players must guess words, pass the “Hot Head” quickly, and hope the buzzer doesn’t go off while they’re still holding it!
 
 > Developed as part of a university computer science course / physical computing project.
 
