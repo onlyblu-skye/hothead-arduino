@@ -1,2 +1,0 @@
-docs/assets/*.mov filter=lfs diff=lfs merge=lfs -text
-docs/assets/Hot_Head_Instruction_Video.mov filter=lfs diff=lfs merge=lfs -text

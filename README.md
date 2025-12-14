@@ -3,7 +3,7 @@ Hot Head is an interactive party game that mixes the thrill of Heads Up with the
 
 > Developed as part of a university computer science course / physical computing project.
 
-[![Hot Head Instruction Video](docs/assets/video_thumbnail.png)](docs/assets/Hot_Head_Instruction_Video.mov)
+[![Hot Head Instruction Video](docs/assets/video_thumbnail.png)](docs/assets/Video_Project.mp4)
 
 ## Concept
 Try to guess as many words as possible before time runs out.
