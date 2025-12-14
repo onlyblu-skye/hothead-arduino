@@ -3,8 +3,7 @@ Hot Head is an interactive party game that mixes the thrill of Heads Up with the
 
 > Developed as part of a university computer science course / physical computing project.
 
-![Banner / Hero Shot](images/banner.png)
-<!-- TODO: Replace with a real hero photo of the final prototype -->
+<video src="docs/assets/Hot_Head_Instruction_Video.mov" controls autoplay loop playsinline width="100%"></video>
 
 ## Concept
 Try to guess as many words as possible before time runs out.
@@ -61,7 +60,7 @@ To build this project you will need:
 
 ## How to build
 ### Wiring
-![Wiring Sketch](images/wiring.png)
+![Wiring Sketch](docs/assets/wiring.png)
 <!-- TODO: Replace with the wiring sketch -->
 
 ### Uploading the code
@@ -72,8 +71,29 @@ To build this project you will need:
    * Pins used for the hardware
    > You can change these in `START_BUTTON_PIN`, `START_LED_PIN`, `PASS_ON_BUTTON_PIN`, `PASS_ON_LED_PIN`, `WIFI_SSID`, `WIFI_PASSWORD`.
 
+## Words
 ### WiFi setup (optional)
-This project can fetch random words online. If WiFi is not available, it automatically falls back to a local word list.
+This project can fetch random words online via a public API.  
+If no WiFi connection is available or the connection fails, the game automatically falls back to a local word list and can be played completely offline.
 
-### Feedback and questions
+### Local Word List
+The local fallback word list (`BASE_WORD_LIST`) can be freely customized.  
+You can replace the existing words with your own vocabulary, for example:
+* a different language
+* themed words (movies, school subjects, locations, etc.)
+* easier or harder words depending on the players
+
+Currently, the fallback list contains **German nouns**.
+
+#### Word API
+The game uses the [Random Words API endpoint from KushCreates.com](https://random-words-api.kushcreates.com/api?language=de&category=animals&words=1).
+
+The API allows customization of:
+* **Language** (e.g. German, English, etc.)
+* **Category** (e.g. animals, sports, games, …)
+
+You can configure these options on the API website, then simply copy the generated API URL and replace the `RANDOM_NOUN_API_URL` in the code.
+
+
+## Feedback and questions
 If you are interested in this project and need to ask questions get in touch with us over Instagram/TikTok/etc/etc
