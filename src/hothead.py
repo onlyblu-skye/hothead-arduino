@@ -8,6 +8,7 @@ import urandom
 import network
 import requests
 
+sleep(1.5)
 # ============================
 # GLOBAL STATE
 # ============================
@@ -111,9 +112,7 @@ def connect_wifi():
 
     display.clear()
     display.color(255, 255, 255)
-    draw(
-        "Connecting to WiFi...",
-    )
+    draw("Connecting to", "WiFi...")
 
     if not wlan.isconnected():
         print("Connecting to WiFi...")
@@ -136,7 +135,7 @@ def connect_wifi():
         print("WiFi connection failed, running offline.")
         display.clear()
         display.color(255, 255, 0)
-        draw("WiFi connection failed", "running offline.")
+        draw("Connection failed", "running offline.")
         sleep(1.5)
 
     return wlan
@@ -185,11 +184,13 @@ def draw(word, timer_text=""):
 
 def random_word():
     """Return a German noun from API if possible, otherwise from a non-repeating fallback pool."""
-    api_noun = fetch_german_noun()
-    if api_noun:
-        return api_noun
+    try:
+        api_noun = fetch_german_noun()
+        if api_noun:
+            return api_noun
+    except (OSError, ValueError) as e:
+        print("API skipped:", e)
 
-    # Refill pool when empty
     if not state.word_pool:
         state.word_pool = [w.upper() for w in BASE_WORD_LIST]
 
@@ -417,15 +418,16 @@ def run_round():
 
 def main():
     """Run the main game loop handling WiFi, idle screen, start, round, and reset."""
-    try:
-        connect_wifi()
-    except (OSError, ValueError) as exc:
-        print("WiFi connection failed or not available:", exc)
-
     show_idle_screen()
 
     while True:
         wait_for_start_button()
+
+        try:
+            connect_wifi()
+        except OSError as exc:
+            print("WiFi skipped:", exc)
+
         pre_countdown()
         run_round()
         show_idle_screen()
