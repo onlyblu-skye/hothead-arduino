@@ -8,21 +8,6 @@ import urandom
 import network
 import requests
 
-sleep(1.5)
-# ============================
-# GLOBAL STATE
-# ============================
-
-
-class GlobalState:
-    """Global state of the Hot Head game."""
-
-    def __init__(self, base_word_list):
-        self.current_word = ""
-        self.last_timer_text = ""
-        self.game_running = False
-        self.word_pool = [w.upper() for w in base_word_list]
-
 
 # ============================
 # CONSTANTS
@@ -59,8 +44,6 @@ BASE_WORD_LIST = [
     "Stadt",
 ]
 
-WORD_LIST = [w.upper() for w in BASE_WORD_LIST]
-
 MIN_TIME_SEC = 15
 MAX_TIME_SEC = 30
 
@@ -81,12 +64,31 @@ RANDOM_NOUN_API_URL = (
     "https://random-words-api.kushcreates.com/api?language=de&category=animals&words=1"
 )
 
-state = GlobalState(BASE_WORD_LIST)
+BOOT_DELAY_SEC = 1.5
+
+sleep(BOOT_DELAY_SEC)
+
+
+# ============================
+# GLOBAL STATE
+# ============================
+
+
+class GlobalState:
+    """Global state of the Hot Head game."""
+
+    def __init__(self, base_word_list):
+        self.current_word = ""
+        self.last_timer_text = ""
+        self.game_running = False
+        self.word_pool = [w.upper() for w in base_word_list]
 
 
 # ============================
 # INITIALIZATION
 # ============================
+
+state = GlobalState(BASE_WORD_LIST)
 
 buzzer = ModulinoBuzzer()
 
@@ -100,7 +102,30 @@ pass_on_led = Pin(PASS_ON_LED_PIN, Pin.OUT)
 
 
 # ============================
-# HELPER FUNCTIONS
+# DISPLAY HELPER FUNCTIONS
+# ============================
+
+
+def center_fit(text, width=DISPLAY_WIDTH):
+    """Return the text centered within the given display width."""
+    t = str(text)
+    if len(t) > width:
+        t = t[:width]
+    padding = (width - len(t)) // 2
+    return " " * padding + t + " " * (width - len(t) - padding)
+
+
+def draw(word, timer_text=""):
+    """Render the word and optional timer text on the two-line display."""
+    display.move(0, 0)
+    display.write(center_fit(word))
+
+    display.move(0, 1)
+    display.write(center_fit(timer_text))
+
+
+# ============================
+# NETWORK / API HELPER FUNCTIONS
 # ============================
 
 
@@ -129,7 +154,7 @@ def connect_wifi():
         print("WiFi connected:", wlan.ifconfig())
         display.clear()
         display.color(0, 255, 0)
-        draw("WiFi connected")
+        draw("WiFi connected", "running online.")
         sleep(1.5)
     else:
         print("WiFi connection failed, running offline.")
@@ -143,59 +168,47 @@ def connect_wifi():
 
 def fetch_german_noun():
     """Retrieve a random German noun from Random Words API."""
+    resp = None
     try:
         resp = requests.get(RANDOM_NOUN_API_URL)
-        if resp.status_code == 200:
-            data = resp.json()
-            resp.close()
+        if resp.status_code != 200:
+            return None
 
-            if isinstance(data, list) and len(data) > 0:
-                entry = data[0]
-                word = entry.get("word")
-                if word:
-                    return word.upper()
+        data = resp.json()
+        if not isinstance(data, list) or not data:
+            return None
 
-        else:
-            resp.close()
+        entry = data[0]
+        if not isinstance(entry, dict):
+            return None
+
+        word = entry.get("word")
+        return word.upper() if word else None
 
     except (OSError, ValueError) as exc:
         print("Noun API failed:", exc)
-
-    return None
-
-
-def center_fit(text, width=DISPLAY_WIDTH):
-    """Return the text centered within the given display width."""
-    t = str(text)
-    if len(t) > width:
-        t = t[:width]
-    padding = (width - len(t)) // 2
-    return " " * padding + t + " " * (width - len(t) - padding)
-
-
-def draw(word, timer_text=""):
-    """Render the word and optional timer text on the two-line display."""
-    display.move(0, 0)
-    display.write(center_fit(word))
-
-    display.move(0, 1)
-    display.write(center_fit(timer_text))
+        return None
+    finally:
+        if resp is not None:
+            resp.close()
 
 
 def random_word():
     """Return a German noun from API if possible, otherwise from a non-repeating fallback pool."""
-    try:
-        api_noun = fetch_german_noun()
-        if api_noun:
-            return api_noun
-    except (OSError, ValueError) as e:
-        print("API skipped:", e)
+    api_noun = fetch_german_noun()
+    if api_noun:
+        return api_noun
 
     if not state.word_pool:
         state.word_pool = [w.upper() for w in BASE_WORD_LIST]
 
     idx = urandom.getrandbits(8) % len(state.word_pool)
     return state.word_pool.pop(idx)
+
+
+# ============================
+# GAME HELPER FUNCTIONS
+# ============================
 
 
 def random_time_sec():
